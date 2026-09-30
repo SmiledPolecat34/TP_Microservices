@@ -16,6 +16,8 @@ public class FitnessClassController {
   @PostMapping public ResponseEntity<FitnessClass> create(@Valid @RequestBody FitnessClass value){ return ResponseEntity.status(HttpStatus.CREATED).body(service.create(value)); }
   @PutMapping("/{id}") public FitnessClass update(@PathVariable Long id,@Valid @RequestBody FitnessClass value){ return service.update(id,value); }
   @DeleteMapping("/{id}") public FitnessClass cancel(@PathVariable Long id){ return service.cancel(id); }
-  @PatchMapping("/{id}/increment") public FitnessClass increment(@PathVariable Long id,@RequestParam int spots){ return service.increment(id,spots); }
-  @PatchMapping("/{id}/decrement") public FitnessClass decrement(@PathVariable Long id,@RequestParam int spots){ return service.decrement(id,spots); }
+  @PatchMapping("/{id}/increment") public FitnessClass increment(@PathVariable Long id,@RequestParam int spots){ return retryOnConflict(()->service.increment(id,spots)); }
+  @PatchMapping("/{id}/decrement") public FitnessClass decrement(@PathVariable Long id,@RequestParam int spots){ return retryOnConflict(()->service.decrement(id,spots)); }
+  // Un conflit de version ne signifie pas que le cours est complet : on relit et on réessaie avant de répondre 409.
+  private FitnessClass retryOnConflict(java.util.function.Supplier<FitnessClass> action){ for(int attempt=1;;attempt++){ try{ return action.get(); }catch(org.springframework.dao.OptimisticLockingFailureException e){ if(attempt>=5) throw e; } } }
 }

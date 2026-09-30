@@ -19,4 +19,5 @@ public class Payment {
  @Enumerated(EnumType.STRING) private Status status;
  public enum PaymentMethod { CREDIT_CARD,DEBIT_CARD,PAYPAL,STRIPE }
  public enum Status { PENDING,SUCCESS,FAILED,REFUNDED }
+ @com.fasterxml.jackson.annotation.JsonIgnore @AssertTrue(message="cardLastFour est obligatoire pour un paiement par carte") public boolean isCardLastFourValid(){ return (paymentMethod!=PaymentMethod.CREDIT_CARD&&paymentMethod!=PaymentMethod.DEBIT_CARD)||cardLastFour!=null; }
 }
