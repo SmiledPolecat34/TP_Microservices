@@ -11,7 +11,17 @@ spring:
   h2:
     console:
       enabled: true
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s
 eureka:
   client:
+    registry-fetch-interval-seconds: 5
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}

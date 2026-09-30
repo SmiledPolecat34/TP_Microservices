@@ -9,3 +9,5 @@ eureka:
     fetch-registry: false
   server:
     enable-self-preservation: false
+    # Le registre servi aux clients est rafraîchi toutes les 3 s (30 s par défaut) pour un démarrage rapide
+    response-cache-update-interval-ms: 3000

@@ -6,3 +6,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+resilience4j:
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 20s

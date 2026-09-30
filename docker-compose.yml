@@ -9,7 +9,7 @@ x-client-depends: &client-depends
 
 services:
   eureka-server:
-    build: { context: ., args: { JAR_FILE: eureka-server/target/eureka-server-1.0.0.jar } }
+    build: { context: ., args: { JAR_FILE: eureka-server/target/eureka-server-1.0.0-exec.jar } }
     ports: ["8761:8761"]
     healthcheck:
       test: ["CMD", "curl", "-fs", "http://localhost:8761/"]
@@ -17,7 +17,7 @@ services:
       timeout: 3s
       retries: 30
   config-server:
-    build: { context: ., args: { JAR_FILE: config-server/target/config-server-1.0.0.jar } }
+    build: { context: ., args: { JAR_FILE: config-server/target/config-server-1.0.0-exec.jar } }
     ports: ["8888:8888"]
     environment:
       EUREKA_URL: http://eureka-server:8761/eureka/
@@ -32,23 +32,29 @@ services:
       timeout: 3s
       retries: 30
   api-gateway:
-    build: { context: ., args: { JAR_FILE: api-gateway/target/api-gateway-1.0.0.jar } }
+    build: { context: ., args: { JAR_FILE: api-gateway/target/api-gateway-1.0.0-exec.jar } }
     ports: ["8080:8080"]
     environment: *client-env
     depends_on: *client-depends
+    # Sain uniquement quand les quatre routes répondent : `docker compose up --wait` rend la main une fois la plateforme utilisable.
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8080/api/classes && curl -fs http://localhost:8080/api/bookings && curl -fs http://localhost:8080/api/payments/user/0 && curl -fs http://localhost:8080/api/notifications/pending"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
   class-service:
-    build: { context: ., args: { JAR_FILE: class-service/target/class-service-1.0.0.jar } }
+    build: { context: ., args: { JAR_FILE: class-service/target/class-service-1.0.0-exec.jar } }
     environment: *client-env
     depends_on: *client-depends
   booking-service:
-    build: { context: ., args: { JAR_FILE: booking-service/target/booking-service-1.0.0.jar } }
+    build: { context: ., args: { JAR_FILE: booking-service/target/booking-service-1.0.0-exec.jar } }
     environment: *client-env
     depends_on: *client-depends
   payment-service:
-    build: { context: ., args: { JAR_FILE: payment-service/target/payment-service-1.0.0.jar } }
+    build: { context: ., args: { JAR_FILE: payment-service/target/payment-service-1.0.0-exec.jar } }
     environment: *client-env
     depends_on: *client-depends
   notification-service:
-    build: { context: ., args: { JAR_FILE: notification-service/target/notification-service-1.0.0.jar } }
+    build: { context: ., args: { JAR_FILE: notification-service/target/notification-service-1.0.0-exec.jar } }
     environment: *client-env
     depends_on: *client-depends
