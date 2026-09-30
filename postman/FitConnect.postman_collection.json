@@ -1,0 +1,18 @@
+{
+  "info": {"name": "FitConnect - Parcours complet", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
+  "variable": [{"key":"baseUrl","value":"http://localhost:8080"},{"key":"classId","value":"1"},{"key":"bookingId","value":"1"}],
+  "item": [
+    {"name":"1 - Créer un cours","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"name\": \"Yoga Flow\",\n  \"description\": \"Cours de yoga tous niveaux\",\n  \"instructor\": \"Marie\",\n  \"gymLocation\": \"Paris\",\n  \"category\": \"YOGA\",\n  \"level\": \"INTERMEDIATE\",\n  \"durationMinutes\": 60,\n  \"maxParticipants\": 10,\n  \"currentParticipants\": 0,\n  \"price\": 20.00,\n  \"dateTime\": \"2030-10-10T18:00:00\",\n  \"status\": \"SCHEDULED\"\n}"},"url":"{{baseUrl}}/api/classes"},"event":[{"listen":"test","script":{"exec":["pm.test('201',()=>pm.response.to.have.status(201));","pm.collectionVariables.set('classId',pm.response.json().id);"]}}]},
+    {"name":"2 - Lister/filtrer les cours","request":{"method":"GET","url":"{{baseUrl}}/api/classes?category=YOGA&level=INTERMEDIATE&page=0&size=10&sort=dateTime,asc"}},
+    {"name":"3 - Détails du cours","request":{"method":"GET","url":"{{baseUrl}}/api/classes/{{classId}}"}},
+    {"name":"4 - Réserver deux places","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"userId\": 1,\n  \"userEmail\": \"john@example.com\",\n  \"userName\": \"John Doe\",\n  \"classId\": {{classId}},\n  \"numberOfSpots\": 2\n}"},"url":"{{baseUrl}}/api/bookings"},"event":[{"listen":"test","script":{"exec":["pm.test('PENDING_PAYMENT',()=>pm.expect(pm.response.json().status).to.eql('PENDING_PAYMENT'));","pm.collectionVariables.set('bookingId',pm.response.json().id);"]}}]},
+    {"name":"5 - Vérifier la réservation","request":{"method":"GET","url":"{{baseUrl}}/api/bookings/{{bookingId}}"}},
+    {"name":"6 - Confirmer et payer","request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"cardLastFour\": \"1234\",\n  \"transactionId\": \"txn_123456\"\n}"},"url":"{{baseUrl}}/api/bookings/{{bookingId}}/confirm"}},
+    {"name":"7 - Annuler et rembourser","request":{"method":"PATCH","url":"{{baseUrl}}/api/bookings/{{bookingId}}/cancel"}},
+    {"name":"8 - Vérifier le remboursement","request":{"method":"GET","url":"{{baseUrl}}/api/payments/booking/{{bookingId}}"}},
+    {"name":"9 - Vérifier les places libérées","request":{"method":"GET","url":"{{baseUrl}}/api/classes/{{classId}}"}},
+    {"name":"10 - Surréservation (erreur attendue)","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\n  \"userId\": 2,\n  \"userEmail\": \"jane@example.com\",\n  \"userName\": \"Jane Doe\",\n  \"classId\": {{classId}},\n  \"numberOfSpots\": 4\n}"},"url":"{{baseUrl}}/api/bookings"}},
+    {"name":"11 - Historique notifications","request":{"method":"GET","url":"{{baseUrl}}/api/notifications/user/1"}},
+    {"name":"12 - Historique paiements","request":{"method":"GET","url":"{{baseUrl}}/api/payments/user/1"}}
+  ]
+}

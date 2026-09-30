@@ -1,0 +1,3 @@
+package com.fitconnect.paymentservice;
+import org.junit.jupiter.api.Test; import java.math.BigDecimal; import static org.junit.jupiter.api.Assertions.*; import static org.mockito.Mockito.*;
+class PaymentServiceTest { @Test void acceptsUnder100AndRefuses100(){PaymentRepository r=mock(PaymentRepository.class);when(r.save(any())).thenAnswer(i->i.getArgument(0));PaymentService s=new PaymentService(r);Payment low=Payment.builder().amount(new BigDecimal("99.99")).build();Payment high=Payment.builder().amount(new BigDecimal("100")).build();assertEquals(Payment.Status.SUCCESS,s.process(low).getStatus());assertEquals(Payment.Status.FAILED,s.process(high).getStatus());} }

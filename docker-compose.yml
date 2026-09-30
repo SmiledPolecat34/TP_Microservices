@@ -1,0 +1,33 @@
+services:
+  eureka-server:
+    build: { context: ., args: { JAR_FILE: eureka-server/target/eureka-server-1.0.0.jar } }
+    ports: ["8761:8761"]
+  config-server:
+    build: { context: ., args: { JAR_FILE: config-server/target/config-server-1.0.0.jar } }
+    ports: ["8888:8888"]
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka/
+      CONFIG_REPO: file:/config-repo
+    volumes: ["./config-repo:/config-repo:ro"]
+    depends_on: [eureka-server]
+  api-gateway:
+    build: { context: ., args: { JAR_FILE: api-gateway/target/api-gateway-1.0.0.jar } }
+    ports: ["8080:8080"]
+    environment: { EUREKA_URL: "http://eureka-server:8761/eureka/", CONFIG_SERVER_URL: "http://config-server:8888" }
+    depends_on: [eureka-server, config-server]
+  class-service:
+    build: { context: ., args: { JAR_FILE: class-service/target/class-service-1.0.0.jar } }
+    environment: { EUREKA_URL: "http://eureka-server:8761/eureka/", CONFIG_SERVER_URL: "http://config-server:8888" }
+    depends_on: [eureka-server, config-server]
+  booking-service:
+    build: { context: ., args: { JAR_FILE: booking-service/target/booking-service-1.0.0.jar } }
+    environment: { EUREKA_URL: "http://eureka-server:8761/eureka/", CONFIG_SERVER_URL: "http://config-server:8888" }
+    depends_on: [eureka-server, config-server, class-service, payment-service, notification-service]
+  payment-service:
+    build: { context: ., args: { JAR_FILE: payment-service/target/payment-service-1.0.0.jar } }
+    environment: { EUREKA_URL: "http://eureka-server:8761/eureka/", CONFIG_SERVER_URL: "http://config-server:8888" }
+    depends_on: [eureka-server, config-server]
+  notification-service:
+    build: { context: ., args: { JAR_FILE: notification-service/target/notification-service-1.0.0.jar } }
+    environment: { EUREKA_URL: "http://eureka-server:8761/eureka/", CONFIG_SERVER_URL: "http://config-server:8888" }
+    depends_on: [eureka-server, config-server]
